@@ -129,7 +129,7 @@
 
   <form class="new-deck-view__form" id="new-deck-form">
     <fieldset class="new-deck-view__fieldset">
-      <legend class="new-deck-view__legend">Choose a color</legend>
+      <legend class="new-deck-view__legend">Pick the deck color</legend>
 
       <label class="new-deck-view__color-label" for="green">
         <input
@@ -141,6 +141,7 @@
           id="green"
           checked
         />
+        <span class="new-deck-view__color new-deck-view__color_type_green" aria-hidden="true"></span>
       </label>
 
       <label class="new-deck-view__color-label" for="blue">
@@ -152,6 +153,7 @@
           value="#91A8F9"
           id="blue"
         />
+        <span class="new-deck-view__color new-deck-view__color_type_blue" aria-hidden="true"></span>
       </label>
 
       <label class="new-deck-view__color-label" for="pink">
@@ -163,6 +165,7 @@
           value="#EE92D7"
           id="pink"
         />
+        <span class="new-deck-view__color new-deck-view__color_type_pink" aria-hidden="true"></span>
       </label>
 
       <label class="new-deck-view__color-label" for="purple">
@@ -174,6 +177,7 @@
           value="#AA8EF0"
           id="purple"
         />
+        <span class="new-deck-view__color new-deck-view__color_type_purple" aria-hidden="true"></span>
       </label>
 
       <label class="new-deck-view__color-label" for="orange">
@@ -185,6 +189,7 @@
           value="#EE955E"
           id="orange"
         />
+        <span class="new-deck-view__color new-deck-view__color_type_orange" aria-hidden="true"></span>
       </label>
 
       <label class="new-deck-view__color-label" for="yellow">
@@ -196,11 +201,12 @@
           value="#F5D770"
           id="yellow"
         />
+        <span class="new-deck-view__color new-deck-view__color_type_yellow" aria-hidden="true"></span>
       </label>
     </fieldset>
 
     <label class="new-deck-view__json-label">
-      JSON
+      Write the JSON array of cards so that it matches the schema
       <textarea
         class="new-deck-view__textarea"
         id="new-deck-json"
@@ -210,7 +216,7 @@
     </label>
 
     <button class="new-deck-view__submit-btn" type="submit" disabled>
-      Create Deck
+      Create the Deck
     </button>
   </form>
 </section>
