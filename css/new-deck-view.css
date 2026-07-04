@@ -112,9 +112,8 @@
   padding: 12px 16px 14px 16px;
   background-color: #1a1a1a;
   color: #ffffff; 
-  font-size: 20px;
-  font-weight: 600;
   cursor: pointer;
+  opacity:30%;
 }
 
 .new-deck-view__submit-btn:disabled {
