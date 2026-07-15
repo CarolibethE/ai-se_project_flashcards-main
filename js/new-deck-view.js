@@ -1,13 +1,13 @@
+import { initialDecks as decks } from "./decks.js";
+
 const HEX_DIGITS = /^[0-9a-fA-F]{6}$/;
 
-const form = document.querySelector("#new-deck-form");
-const submitBtn = form.querySelector(".new-deck-view__submit-btn");
-const textarea = form.querySelector(".new-deck-view__textarea");
+let form = null;
+let submitBtn = null;
+let textarea = null;
 
 /**
- * Converts a string to a URL-safe slug: lowercase with any run of
- * non-alphanumeric characters replaced by a single hyphen, and no leading or
- * trailing hyphens.
+ * Converts a string to a URL-safe slug.
  *
  * @param {string} str
  * @returns {string}
@@ -21,15 +21,15 @@ function slugify(str) {
 }
 
 /**
- * Returns a consistent lowercase hex color string with a leading "#".
- * Accepts values with or without a leading "#". Returns "#64d583" as a
- * fallback if the value is missing or not a valid 6-digit hex.
+ * Returns a lowercase six-digit hex color with a leading "#".
  *
  * @param {string|undefined} color
  * @returns {string}
  */
 function normalizeColor(color) {
-  if (!color) return "#64d583";
+  if (!color) {
+    return "#64d583";
+  }
 
   const hex = color.startsWith("#") ? color.slice(1) : color;
 
@@ -37,22 +37,61 @@ function normalizeColor(color) {
     return "#64d583";
   }
 
-  return "#" + hex.toLowerCase();
+  return `#${hex.toLowerCase()}`;
 }
 
 /**
- * Enables the submit button.
- * (The lesson keeps the name disableSubmitBtn even though it enables it.)
+ * Enables the New Deck form submit button.
  */
 function disableSubmitBtn() {
-  submitBtn.disabled = false;
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute("disabled");
+  }
+}
+
+function initNewDeckForm() {
+  form = document.querySelector("#new-deck-form");
+
+  if (!form) {
+    return;
+  }
+
+  submitBtn = form.querySelector(".new-deck-view__submit-btn");
+  textarea = form.querySelector(".new-deck-view__textarea");
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(form);
+    const submittedData = Object.fromEntries(formData);
+
+    const jsonData = JSON.parse(submittedData["deck-json"]);
+    const selectedColor = submittedData["deck-color"] || submittedData.color;
+    const color = normalizeColor(selectedColor);
+    const id = `${slugify(jsonData.name)}-${Date.now()}`;
+
+    const newDeck = {
+      id,
+      color,
+      name: jsonData.name,
+      cards: jsonData.cards,
+    };
+
+    decks.push(newDeck);
+
+    window.location.hash = `#deck/${id}`;
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initNewDeckForm, { once: true });
+} else {
+  initNewDeckForm();
 }
 
 export {
   disableSubmitBtn,
-  form,
-  submitBtn,
-  textarea,
   slugify,
   normalizeColor,
 };

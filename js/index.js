@@ -201,6 +201,7 @@ const exampleDeck = {
 };
 
 newDeckTextarea.value = JSON.stringify(exampleDeck, null, 2);
+disableSubmitBtn();
 
 const newDeckForm = document.querySelector("#new-deck-form");
 
