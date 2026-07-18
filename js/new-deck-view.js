@@ -2,12 +2,15 @@ import { initialDecks as decks } from "./decks.js";
 
 const HEX_DIGITS = /^[0-9a-fA-F]{6}$/;
 
-let form = null;
-let submitBtn = null;
-let textarea = null;
+const form = document.querySelector("#new-deck-form");
+const submitBtn = form.querySelector(".new-deck-view__submit-btn");
+
+const errorModal = document.querySelector("#error-modal");
+const errorModalCloseBtn = errorModal.querySelector(".modal__close-btn");
+const errorMessage = errorModal.querySelector(".modal__error");
 
 /**
- * Converts a string to a URL-safe slug.
+ * Converts a string into a URL-safe slug.
  *
  * @param {string} str
  * @returns {string}
@@ -41,57 +44,109 @@ function normalizeColor(color) {
 }
 
 /**
- * Enables the New Deck form submit button.
+ * Checks that the deck name is a string between 2 and 80 characters.
+ *
+ * @param {*} name
+ * @returns {string|null}
  */
-function disableSubmitBtn() {
-  if (submitBtn) {
-    submitBtn.disabled = false;
-    submitBtn.removeAttribute("disabled");
+function validateName(name) {
+  if (
+    typeof name !== "string" ||
+    name.length < 2 ||
+    name.length > 80
+  ) {
+    return null;
+  }
+
+  return name;
+}
+
+/**
+ * Parses a JSON string without crashing the application.
+ *
+ * @param {string} jsonString
+ * @returns {object|null}
+ */
+function parseJSON(jsonString) {
+  try {
+    return JSON.parse(jsonString);
+  } catch (error) {
+    return null;
   }
 }
 
-function initNewDeckForm() {
-  form = document.querySelector("#new-deck-form");
+/**
+ * Displays the error modal with a helpful message.
+ *
+ * @param {string} message
+ */
+function showError(message) {
+  errorMessage.textContent = message;
+  errorModal.classList.add("modal_visible");
+}
 
-  if (!form) {
+/**
+ * Enables the New Deck submit button.
+ */
+function disableSubmitBtn() {
+  submitBtn.disabled = false;
+}
+
+errorModalCloseBtn.addEventListener("click", () => {
+  errorModal.classList.remove("modal_visible");
+});
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const formData = new FormData(form);
+  const submittedData = Object.fromEntries(formData);
+
+  const jsonData = parseJSON(submittedData["deck-json"]);
+
+  if (!jsonData) {
+    showError(
+      "The deck JSON is invalid. Check the formatting and try again."
+    );
     return;
   }
 
-  submitBtn = form.querySelector(".new-deck-view__submit-btn");
-  textarea = form.querySelector(".new-deck-view__textarea");
+  const name = validateName(jsonData.name);
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
+  if (!name) {
+    showError(
+      "The deck name must be a string between 2 and 80 characters."
+    );
+    return;
+  }
 
-    const formData = new FormData(form);
-    const submittedData = Object.fromEntries(formData);
+  if (!Array.isArray(jsonData.cards)) {
+    showError("The cards field must be an array.");
+    return;
+  }
 
-    const jsonData = JSON.parse(submittedData["deck-json"]);
-    const selectedColor = submittedData["deck-color"] || submittedData.color;
-    const color = normalizeColor(selectedColor);
-    const id = `${slugify(jsonData.name)}-${Date.now()}`;
+  const colorValue = normalizeColor(submittedData.color);
 
-    const newDeck = {
-      id,
-      color,
-      name: jsonData.name,
-      cards: jsonData.cards,
-    };
+  if (typeof jsonData.color ==="string") {
+    if (jsonData.color.toLowerCase() !== colorValue) {
+        showError(
+            "The color in the JSON doesn't match the selected color. Please make them match or remove the color field from the JSON."
+        );
+        return;
+    }
+  }
+  const id = `${slugify(name)}-${Date.now()}`;
 
-    decks.push(newDeck);
+  const newDeck = {
+    id,
+    color: colorValue,
+    name,
+    cards: jsonData.cards,
+  };
 
-    window.location.hash = `#deck/${id}`;
-  });
-}
+  decks.push(newDeck);
 
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initNewDeckForm, { once: true });
-} else {
-  initNewDeckForm();
-}
+  window.location.hash = `deck/${id}`;
+});
 
-export {
-  disableSubmitBtn,
-  slugify,
-  normalizeColor,
-};
+export { disableSubmitBtn };
